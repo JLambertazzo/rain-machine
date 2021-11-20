@@ -1,0 +1,31 @@
+body {
+    height: 100%;
+    margin: 0;
+    /* might be necessary for rain container */
+    overflow: hidden;
+}
+
+h1 {
+    color: darkslateblue;
+    background: ivory;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: min-content;
+    width: 60%;
+    z-index: 3;
+    padding: 5px;
+    border-radius: 5px;
+    font-family: monospace;
+    text-align: center;
+}
+
+.rain-container {
+    background-color: darkslateblue;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}

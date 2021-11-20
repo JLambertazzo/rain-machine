@@ -1,0 +1,1 @@
+const rm = new RainMachine('.rain-container', { precipitation: 'rain', wind: 0 })
