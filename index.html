@@ -12,7 +12,43 @@
 <body>
     <div class="rain-container">
         <div class="rain-content">
-            <h1>Demo of the Rain Machine library</h1>
+            <div class="text-container">
+                <h1>Rain Machine Demo v0.0.1</h1>
+                <details>
+                    <summary>Usage:</summary>
+                    Import the library and include the following line in your javascript <br>
+                    <code>new RainMachine(query, options)</code><br>
+                    query: querySelector text like ".rain-container"
+                    options: options object, all properties are optional <br> <span>precipitation</span> 'rain' | 'snow' | 'hail' <br>
+                    <span>wind</span> 0 | 1 | 2 <br> <span>numClouds</span> #clouds to show <br> <span>now</span> current time <br>
+                    <span>lightData: {sunrise, sunset}</span> sunrise and sunset are both date objects
+                </details>
+            </div>
+        </div>
+    </div>
+    <div class="controls">
+        <div>
+            <h2>Precipitation:</h2>
+            <button onclick="setRain()">Rain</button>
+            <button onclick="setSnow()">Snow</button>
+            <button onclick="setHail()">Hail</button>
+        </div>
+        <div>
+            <h2>Wind:</h2>
+            <button onclick="setNoWind()">None</button>
+            <button onclick="setWind()">Wind</button>
+            <button onclick="setWindy()">Strong Wind</button>
+        </div>
+        <div>
+            <h2>Clouds:</h2>
+            <button onclick="setNoClouds()">None</button>
+            <button onclick="setClouds()">Cloudy</button>
+            <button onclick="setCloudy()">Very Cloudy</button>
+        </div>
+        <div>
+            <h2>Time:</h2>
+            <input type="range" name="time" id="time" min="0" max="24"/><br>
+            <label for="time" id="time-label">now</label>
         </div>
     </div>
 </body>
