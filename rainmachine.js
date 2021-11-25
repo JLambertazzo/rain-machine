@@ -13,7 +13,7 @@
                 sunrise: new Date(new Date().setHours('08')),
                 sunset: new Date(new Date().setHours('17')),
             },
-            ...options
+            ...validateOptions(options)
         }
         const [colour, sunPos] = skyMath(this.options)
         this.options.sunPos = sunPos
@@ -30,6 +30,32 @@
 
     const skyRange = ["#03045E", "#023E8A", "#0077B6", "#0096C7", "#00B4D8", "#48CAE4", "#90E0EF", "#48CAE4", "#00B4D8", "#0096C7", "#0077B6", "#023E8A", "#03045E"]
     const nightColour = "#001233"
+
+    /**
+     * Validate the user-input options
+     * @param {library options} options 
+     * @returns validated options
+     */
+    function validateOptions(options) {
+        console.log('raw', options)
+        const valid = {...options}
+        if (!['rain', 'snow', 'hail', 'none'].includes(valid.precipitation)) {
+            valid.precipitation = 'none'
+        }
+        if (!valid.wind || valid.wind < 0 || valid.wind > 2) {
+            valid.wind = 0 // restricted for now
+        }
+        if (valid.numClouds && valid.numClouds > 40) {
+            valid.numClouds = 40
+        }
+        if (valid.lightData && typeof(valid.lightData.sunrise) === 'number') {
+            valid.lightData.sunrise = new Date(valid.lightData.sunrise)
+        }
+        if (valid.lightData && typeof(valid.lightData.sunset) === 'number') {
+            valid.lightData.sunset = new Date(valid.lightData.sunset)
+        }
+        return valid
+    }
 
     /**
      * do the math to find out sky colour and sunPos
@@ -269,15 +295,18 @@
         element.innerHTML = "";
         // make drops
         let drops = "";
-        for (let i = -20; i < 120; i++) {
-            const randoHundo = (Math.floor(Math.random() * 99 + 1));
-            const randoFiver = (Math.floor(Math.random() * 4 + 2));
-            const snowSize = (Math.floor(Math.random() * 15));
-            drops += `
-            <div class="drop" style="left:${i}%;bottom: ${(randoFiver + randoFiver - 1 + 100)}%; animation-delay: ${randoHundo/10}s; animation-duration: ${ precipitation === 'snow' ? `6.${9*randoHundo}` : `0.5${randoHundo}`}s;">
-                <div class="stem" style="${precipitation === "snow" ? `width: ${snowSize}px;height:${snowSize}px;` : ''}animation-delay: ${randoHundo/10}s; animation-duration: ${ precipitation === 'snow' ? `6.${9*randoHundo}` : `0.5${randoHundo}`}s;"></div>
-                <div class="splat" style="animation-delay: ${randoHundo/10}s; animation-duration: ${ precipitation === 'snow' ? `6.${9*randoHundo}` : `0.5${randoHundo}`}s;"></div>
-            </div>`;
+        console.log('precipitaition', precipitation)
+        if (precipitation !== 'none') {
+            for (let i = -20; i < 120; i++) {
+                const randoHundo = (Math.floor(Math.random() * 99 + 1));
+                const randoFiver = (Math.floor(Math.random() * 4 + 2));
+                const snowSize = (Math.floor(Math.random() * 15));
+                drops += `
+                <div class="drop" style="left:${i}%;bottom: ${(randoFiver + randoFiver - 1 + 100)}%; animation-delay: ${randoHundo/10}s; animation-duration: ${ precipitation === 'snow' ? `6.${9*randoHundo}` : `0.5${randoHundo}`}s;">
+                    <div class="stem" style="${precipitation === "snow" ? `width: ${snowSize}px;height:${snowSize}px;` : ''}animation-delay: ${randoHundo/10}s; animation-duration: ${ precipitation === 'snow' ? `6.${9*randoHundo}` : `0.5${randoHundo}`}s;"></div>
+                    <div class="splat" style="animation-delay: ${randoHundo/10}s; animation-duration: ${ precipitation === 'snow' ? `6.${9*randoHundo}` : `0.5${randoHundo}`}s;"></div>
+                </div>`;
+            }
         }
         // make sun
         let sun = ""

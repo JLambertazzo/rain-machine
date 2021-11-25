@@ -66,4 +66,10 @@ now.setMinutes('0')
 now.setSeconds('0')
 document.querySelector('#time-label').innerHTML = now.toLocaleTimeString()
 document.querySelector('#time').setAttribute('value', now.getHours())
-setRM()
+
+// fetch from api
+fetch('http://localhost:8000/weather/Toronto').then(res => res.json()).then(json => {
+    console.log('got', json)
+    options = json
+    setRM()
+})
