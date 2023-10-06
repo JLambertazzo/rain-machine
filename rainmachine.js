@@ -363,5 +363,37 @@
         }
     }
 
+    /**
+     * Get type of precipitation according to weather API specs
+     * @param {number} code
+     * @returns {'rain' | 'snow' | 'none'}
+     */
+    const processPrecipitation = (code) => {
+        const d = Math.floor(code / 100);
+        if ([2, 3, 5].includes(d)) {
+        return "rain";
+        }
+        if (d === 6) {
+        return "snow";
+        }
+        return "none";
+    };
+    
+    /**
+     * Transform data from weather API type to rain machine type
+     * @param {*} data
+     * @returns {{precipitation: 'rain' | 'snow' | 'none', wind: any, numClouds: number, lightData: {sunrise: number, sunset: number}}}
+     */
+    const toRainMachineOptions = (data) => ({
+        precipitation: processPrecipitation(data.weather[0].id),
+        wind: data.wind,
+        numClouds: data.clouds,
+        lightData: {
+        sunrise: data.sys.sunrise,
+        sunset: data.sys.sunset,
+        },
+    });
+
     global.RainMachine = global.RainMachine || RainMachine
+    global.RainMachine.toRainMachineOptions = toRainMachineOptions
 })(window, window.document)
