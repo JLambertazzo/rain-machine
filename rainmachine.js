@@ -23,8 +23,8 @@
         // important styles for container/content
         this.element.style.overflow = 'hidden'
         this.content.style.zIndex = 100
-        this.css = document.styleSheets[0];
-        setStyles(this.css, this.options, query) // work on this lol
+        this.styleSheet = setStyles(this.options, query) // work on this lol
+        document.head.appendChild(this.styleSheet)
         makeItRain(this.element, this.content, this.options)
     }
 
@@ -111,12 +111,14 @@
         });
     }
 
-    function setStyles(css, options, query) {
+    function setStyles(options, query) {
         // reset styles in case previous ones exist
-        removeRules(css)
+        const styleSheet = document.createElement('style')
+        styleSheet.setAttribute('type', 'text/css')
+        console.log(styleSheet, styleSheet.sheet)
         // destructure relevant options
         const { precipitation, wind, sunPos } = options
-        css.insertRule(`
+        styleSheet.appendChild(document.createTextNode(`
             @keyframes drop {
                 0% {
                     /* variable */
@@ -131,8 +133,8 @@
                     transform: translateY(90vh) translateX(${wind * 15}vw);
                 }
             }
-        `, css.cssRules.length)
-        css.insertRule(`
+        `))
+        styleSheet.appendChild(document.createTextNode(`
         @keyframes stem {
             0% {
                 opacity: 1;
@@ -147,8 +149,8 @@
                 opacity: 0;
             }
         }
-        `, css.cssRules.length)
-        css.insertRule(`
+        `))
+        styleSheet.appendChild(document.createTextNode(`
         @keyframes splat {
             0% {
               opacity: ${precipitation === "rain" ? 1 : 0};
@@ -167,8 +169,8 @@
               transform: scale(1.5);
             }
         }
-        `, css.cssRules.length)
-        css.insertRule(`
+        `))
+        styleSheet.appendChild(document.createTextNode(`
         @keyframes sun {
             0% {
               transform: rotate(0deg);
@@ -180,8 +182,8 @@
               transform: rotate(360deg);
             }
         }
-        `, css.cssRules.length)
-        css.insertRule(`
+        `))
+        styleSheet.appendChild(document.createTextNode(`
         @keyframes cloud {
             0% {
               transform: translateX(-40vw);
@@ -190,8 +192,8 @@
               transform: translateX(140vw);
             }
         }
-        `, css.cssRules.length)
-        css.insertRule(`
+        `))
+        styleSheet.appendChild(document.createTextNode(`
         ${query} .drop {
             position: absolute;
             bottom: 100%;
@@ -201,8 +203,8 @@
             animation: drop 0.5s linear infinite;
             z-index: 10;
         }
-        `, css.cssRules.length)
-        css.insertRule(`
+        `))
+        styleSheet.appendChild(document.createTextNode(`
         ${query} .stem {
             /* different for snow */
             width: ${precipitation === 'rain' ? 1 : 10}px;
@@ -215,8 +217,8 @@
             transform: rotate(-${wind * 15}deg);
             animation: stem 0.5s linear infinite;
         }
-        `, css.cssRules.length)
-        css.insertRule(`
+        `))
+        styleSheet.appendChild(document.createTextNode(`
         ${query} .splat {
             width: 15px;
             height: 10px;
@@ -226,41 +228,43 @@
             transform: scale(0);
             animation: splat 5s linear infinite;
         }
-        `, css.cssRules.length)
-        css.insertRule(`
+        `))
+        styleSheet.appendChild(document.createTextNode(`
         ${query} .sun {
-            width: 8rem;
-            height: 8rem;
+            width: 0;
+            height: 0;
+            padding: 5%;
             position: absolute;
             top: ${10 - 9/Math.max(Math.abs(50-sunPos),1)}%;
             left: ${sunPos % 200}%;
             animation: sun 20s linear infinite;
         }
-        `, css.cssRules.length)
-        css.insertRule(`
+        `))
+        styleSheet.appendChild(document.createTextNode(`
         ${query} .cloud-main {
             width: 12rem;
             height: 4rem;
-            background: ivory;
+            background: ${precipitation !== 'none' ? 'lightgray' : 'ivory'};
             opacity: 0.9;
             position: absolute;
             border-radius: 50px;
             animation: cloud ${20/(wind + 1)}s linear infinite;
         }
-        `, css.cssRules.length)
-        css.insertRule(`
+        `))
+        styleSheet.appendChild(document.createTextNode(`
         ${query} .cloud-sub {
             position: absolute;
             border-radius: 50%;
-            background: ivory;
+            background: ${precipitation !== 'none' ? 'lightgray' : 'ivory'};
         }
-        `, css.cssRules.length)
-        css.insertRule(`
+        `))
+        styleSheet.appendChild(document.createTextNode(`
         ${query} .rm--moon {
             background: rgb(211,211,211);
             background: linear-gradient(328deg, rgba(211,211,211,1) 0%, rgba(195,195,195,1) 50%);
-            width: 8rem;
-            height: 8rem;
+            width: 0;
+            height: 0;
+            padding: 5%;
             border-radius: 50%;
             position: absolute;
             top: ${10 - 9/Math.max(Math.abs(150-sunPos),1)}%;
@@ -268,15 +272,15 @@
             box-shadow: inset 0.33rem -0.33rem 1rem rgb(125,125,125);
             z-index: 6;
         }
-        `, css.cssRules.length)
-        css.insertRule(`
+        `))
+        styleSheet.appendChild(document.createTextNode(`
         ${query} .rm--moon .crater {
             background: rgb(175,175,175);
             border-radius: 50%;
             position: absolute;
         }
-        `, css.cssRules.length)
-        css.insertRule(`
+        `))
+        styleSheet.appendChild(document.createTextNode(`
         ${query} .rm--moon .shadow {
             background: #001233;
             width: 14.5rem;
@@ -285,7 +289,8 @@
             position: absolute;
             transform: translate(-50%,-50%);
         }
-        `, css.cssRules.length)
+        `))
+        return styleSheet
     }
 
     // helper functions will exist
@@ -323,25 +328,25 @@
         if (sunAndMoon) {
             moon = `
                 <div class="rm--moon">
-                    <div class="crater" style="width:2.5rem;height:2.5rem;bottom:20%;left:55%;"></div>
-                    <div class="crater" style="width:0.9rem;height:0.9rem;bottom:55%;left:75%;"></div>
-                    <div class="crater" style="width:2.1rem;height:2.1rem;bottom:60%;left:35%;"></div>
+                    <div class="crater" style="padding:15%;bottom:20%;left:55%;"></div>
+                    <div class="crater" style="padding:5%;bottom:55%;left:75%;"></div>
+                    <div class="crater" style="padding:10%;bottom:60%;left:35%;"></div>
                 </div>
             `
         }
         // make clouds
         let clouds = ""
         for (let i = 0; i < numClouds; i++) {
-            const cloudHeight = Math.random()*40 + 5
+            const cloudHeight = Math.random()*15 + Math.random()*10*(Math.random() >= 0.5 ? 1 : -1)
             const delay = Math.random()*20 + i
-            const duration = (Math.random() + 22)/(wind + 1)
-            const zIndex = Math.random() >= 0.5 ? 7 : 1
-            const mainHeight = Math.random()*4 + 3;
-            const mainWidth = mainHeight*3.4//Math.random()*2 + 14;
+            const duration = (Math.random()*5 + 40)/(wind/2 + 1)
+            const zIndex = Math.random() >= 0.4 ? 7 : 1
+            const mainHeight = Math.random()*3 + 1;
+            const mainWidth = mainHeight*2.2//Math.random()*2 + 14;
             clouds += `
-            <div class="cloud-main" style="width:${mainWidth}rem;height:${mainHeight}rem;top:${cloudHeight}%;animation-delay:-${delay}s;animation-duration:${duration}s;z-index:${zIndex};">
-                <div class="cloud-sub" style="height:${mainHeight}rem;width:${mainHeight}rem;top:-50%;left:15%;"></div>
-                <div class="cloud-sub" style="height:${mainHeight*1.5}rem;width:${mainHeight*1.5}rem;top:-70%;left:40%;"></div>
+            <div class="cloud-main" style="width:0;height:0;padding:${mainHeight}% ${mainWidth}%;top:${cloudHeight}%;animation-delay:-${delay}s;animation-duration:${duration}s;z-index:${zIndex};left:-40vw;">
+                <div class="cloud-sub" style="height:0;width:0;padding:20% 20%;top:-27%;left:10%;"></div>
+                <div class="cloud-sub" style="height:0;width:0;padding:30% 30%;top:-37%;left:35%;"></div>
             </div>
             `
         }
@@ -353,7 +358,9 @@
     }
 
     RainMachine.prototype = {
-        // set functions here
+        getSkyColour: function() {
+            return skyMath(this.options)[0]
+        }
     }
 
     global.RainMachine = global.RainMachine || RainMachine
