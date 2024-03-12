@@ -389,8 +389,8 @@
         wind: data.wind,
         numClouds: data.clouds,
         lightData: {
-        sunrise: data.sys.sunrise,
-        sunset: data.sys.sunset,
+        sunrise: data.sys.sunrise*1000,
+        sunset: data.sys.sunset*1000,
         },
     });
 
