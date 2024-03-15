@@ -74,8 +74,8 @@ const normalize = (x, max, min, a, b) =>
     if (!valid.wind || valid.wind < 0 || valid.wind > 2) {
       valid.wind = 0; // restricted for now
     }
-    if (valid.numClouds && valid.numClouds > 40) {
-      valid.numClouds = 40;
+    if (valid.numClouds) {
+      valid.numClouds = Math.min(valid.numClouds, 40);
     }
     if (valid.lightData && typeof valid.lightData.sunrise === "number") {
       valid.lightData.sunrise = new Date(valid.lightData.sunrise);
@@ -525,7 +525,7 @@ const normalize = (x, max, min, a, b) =>
    */
   const toRainMachineOptions = (data) => ({
     precipitation: processPrecipitation(data.weather[0].id),
-    wind: data.wind,
+    wind: data.wind.speed,
     numClouds: data.clouds.all,
     lightData: {
       sunrise: data.sys.sunrise * 1000,

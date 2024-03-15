@@ -1,75 +1,79 @@
-let options = { precipitation: 'rain', wind: 0 }
-const sunrise = new Date()
-sunrise.setHours('0')
-sunrise.setMinutes('0')
-sunrise.setSeconds('0')
+let options = { precipitation: "rain", wind: 0 };
+const sunrise = new Date();
+sunrise.setHours("0");
+sunrise.setMinutes("0");
+sunrise.setSeconds("0");
 
 function setRM() {
-    new RainMachine('.rain-container', options)
+  new RainMachine(".rain-container", options);
 }
 
 function setRain() {
-    options = {...options, precipitation: 'rain'}
-    setRM()
+  options = { ...options, precipitation: "rain" };
+  setRM();
 }
 
 function setSnow() {
-    options = {...options, precipitation: 'snow'}
-    setRM()
+  options = { ...options, precipitation: "snow" };
+  setRM();
 }
 
 function setHail() {
-    options = {...options, precipitation: 'hail'}
-    setRM()
+  options = { ...options, precipitation: "hail" };
+  setRM();
 }
 
 function setNoWind() {
-    options = {...options, wind: 0}
-    setRM()
+  options = { ...options, wind: 0 };
+  setRM();
 }
 
 function setWind() {
-    options = {...options, wind: 1}
-    setRM()
+  options = { ...options, wind: 1 };
+  setRM();
 }
 
 function setWindy() {
-    options = {...options, wind: 2}
-    setRM()
+  options = { ...options, wind: 2 };
+  setRM();
 }
 
 function setNoClouds() {
-    options = {...options, numClouds: 0}
-    setRM()
+  options = { ...options, numClouds: 0 };
+  setRM();
 }
 
 function setClouds() {
-    options = {...options, numClouds: 5}
-    setRM()
+  options = { ...options, numClouds: 5 };
+  setRM();
 }
 
 function setCloudy() {
-    options = {...options, numClouds: 25}
-    setRM()
+  options = { ...options, numClouds: 25 };
+  setRM();
 }
 
-document.querySelector('#time').addEventListener('input', (event) => {
-    const copy = new Date(sunrise)
-    copy.setHours(event.target.value)
-    document.querySelector("#time-label").innerHTML = copy.toLocaleTimeString()
-    options = {...options, now: copy}
-    setRM()
-})
+document.querySelector("#time").addEventListener("input", (event) => {
+  const copy = new Date(sunrise);
+  copy.setHours(event.target.value);
+  document.querySelector("#time-label").innerHTML = copy.toLocaleTimeString();
+  options = { ...options, now: copy };
+  setRM();
+});
 
-const now = new Date()
-now.setMinutes('0')
-now.setSeconds('0')
-document.querySelector('#time-label').innerHTML = now.toLocaleTimeString()
-document.querySelector('#time').setAttribute('value', now.getHours())
+const now = new Date();
+now.setMinutes("0");
+now.setSeconds("0");
+document.querySelector("#time-label").innerHTML = now.toLocaleTimeString();
+document.querySelector("#time").setAttribute("value", now.getHours());
 
 // fetch from api
-fetch('http://localhost:8000/weather/Toronto').then(res => res.json()).then(json => {
-    console.log('got', json)
-    options = json
-    setRM()
-})
+fetch(
+  "https://api.openweathermap.org/data/2.5/weather/?appid=c20f1f400b486d5d180a0287d75cafb4&q=Toronto"
+)
+  .then((res) => res.json())
+  .then(RainMachine.toRainMachineOptions)
+  .then((opts) => {
+    options = opts;
+    setRM();
+  });
