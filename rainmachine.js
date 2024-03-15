@@ -18,6 +18,18 @@ const el = (tag, classes = [], props = {}, ...children) => {
   return element;
 };
 
+/**
+ * Normalize x over the range [a,b] based on it's value between [min,max]
+ * @param {number} x
+ * @param {number} max
+ * @param {number} min
+ * @param {number} a
+ * @param {number} b
+ * @returns
+ */
+const normalize = (x, max, min, a, b) =>
+  ((b - a) * (x - min)) / (max - min) + a;
+
 (function (global, document) {
   function RainMachine(query, options = {}) {
     // setup thingies here
@@ -47,22 +59,7 @@ const el = (tag, classes = [], props = {}, ...children) => {
     makeItRain(this.element, this.content, this.options);
   }
 
-  const skyRange = [
-    "#03045E",
-    "#023E8A",
-    "#0077B6",
-    "#0096C7",
-    "#00B4D8",
-    "#48CAE4",
-    "#90E0EF",
-    "#48CAE4",
-    "#00B4D8",
-    "#0096C7",
-    "#0077B6",
-    "#023E8A",
-    "#03045E",
-  ];
-  const nightColour = "#001233";
+  const getSkyHsl = (lightness) => `hsla(195, 100%, ${lightness}%, 1)`;
 
   /**
    * Validate the user-input options
@@ -70,7 +67,6 @@ const el = (tag, classes = [], props = {}, ...children) => {
    * @returns validated options
    */
   function validateOptions(options) {
-    console.log("raw", options);
     const valid = { ...options };
     if (!["rain", "snow", "hail", "none"].includes(valid.precipitation)) {
       valid.precipitation = "none";
@@ -103,19 +99,18 @@ const el = (tag, classes = [], props = {}, ...children) => {
     if (now > sunset) {
       const newSunrise = new Date(sunrise);
       newSunrise.setDate(newSunrise.getDate() + 1);
-      const zeroToOne = (now - sunset) / (newSunrise - sunset);
-      sunPos = 100 + zeroToOne * 100;
-      colour = nightColour;
+      sunPos = 100 + normalize(now, newSunrise, sunset, 0, 100);
+      colour = getSkyHsl(10);
     } else if (now < sunrise) {
       const newSunset = new Date(sunset);
       newSunset.setDate(newSunset.getDate() - 1);
-      const zeroToOne = (now - newSunset) / (sunrise - newSunset);
-      sunPos = 100 + zeroToOne * 100;
-      colour = nightColour;
+      sunPos = 100 + normalize(now, sunrise, newSunset, 0, 100);
+      colour = getSkyHsl(10);
     } else {
-      const zeroToOne = (now - sunrise) / (sunset - sunrise);
-      sunPos = zeroToOne * 100;
-      colour = skyRange[Math.round(zeroToOne * (skyRange.length - 1))];
+      const normalized = normalize(now, sunset, sunrise, -20, 20);
+      const lightness = 40 - Math.abs(normalized);
+      sunPos = normalize(now, sunset, sunrise, 0, 100);
+      colour = getSkyHsl(lightness);
     }
     return [colour, sunPos];
   }
@@ -150,7 +145,6 @@ const el = (tag, classes = [], props = {}, ...children) => {
     // reset styles in case previous ones exist
     const styleSheet = document.createElement("style");
     styleSheet.setAttribute("type", "text/css");
-    console.log(styleSheet, styleSheet.sheet);
     // destructure relevant options
     const { precipitation, wind, sunPos } = options;
     styleSheet.appendChild(
@@ -282,19 +276,6 @@ const el = (tag, classes = [], props = {}, ...children) => {
     );
     styleSheet.appendChild(
       document.createTextNode(`
-        ${query} .sun {
-            width: 0;
-            height: 0;
-            padding: 5%;
-            position: absolute;
-            top: ${10 - 9 / Math.max(Math.abs(50 - sunPos), 1)}%;
-            left: ${sunPos % 200}%;
-            animation: sun 20s linear infinite;
-        }
-        `)
-    );
-    styleSheet.appendChild(
-      document.createTextNode(`
         ${query} .cloud-main {
             width: 12rem;
             height: 4rem;
@@ -327,7 +308,7 @@ const el = (tag, classes = [], props = {}, ...children) => {
             padding: 5%;
             border-radius: 50%;
             position: absolute;
-            top: ${10 - 9 / Math.max(Math.abs(50 - sunPos), 1)}%;
+            top: ${5 + Math.pow(sunPos - 50, 2) / 100}%;
             left: ${sunPos % 200}%;
             z-index: 6;
         }
@@ -392,7 +373,7 @@ const el = (tag, classes = [], props = {}, ...children) => {
             padding: 5%;
             border-radius: 50%;
             position: absolute;
-            top: ${10 - 9 / Math.max(Math.abs(150 - sunPos), 1)}%;
+            top: ${5 + Math.pow(sunPos - 150, 2) / 100}%;
             left: ${sunPos - (110 % 200)}%;
             z-index: 6;
         }
@@ -455,7 +436,6 @@ const el = (tag, classes = [], props = {}, ...children) => {
     element.innerHTML = "";
     // make drops
     let drops = "";
-    console.log("precipitaition", precipitation);
     if (precipitation !== "none") {
       for (let i = -20; i < 120; i++) {
         const randoHundo = Math.floor(Math.random() * 99 + 1);
