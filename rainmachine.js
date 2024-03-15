@@ -31,6 +31,10 @@ const normalize = (x, max, min, a, b) =>
   ((b - a) * (x - min)) / (max - min) + a;
 
 (function (global, document) {
+  const RM_MAX_CLOUDS = 40;
+  const RM_MAX_SAT_LOSS = 40;
+  const RM_MAX_LIGHT = 40;
+  const RM_MAX_LIGHT_LOSS = 20;
   function RainMachine(query, options = {}) {
     // setup thingies here
     this.options = {
@@ -59,7 +63,8 @@ const normalize = (x, max, min, a, b) =>
     makeItRain(this.element, this.content, this.options);
   }
 
-  const getSkyHsl = (lightness) => `hsla(195, 100%, ${lightness}%, 1)`;
+  const getSkyHsl = (lightness = 100, saturation = 100) =>
+    `hsla(195, ${saturation}%, ${lightness}%, 1)`;
 
   /**
    * Validate the user-input options
@@ -75,7 +80,7 @@ const normalize = (x, max, min, a, b) =>
       valid.wind = 0; // restricted for now
     }
     if (valid.numClouds) {
-      valid.numClouds = Math.min(valid.numClouds, 40);
+      valid.numClouds = normalize(valid.numClouds, 100, 0, 0, RM_MAX_CLOUDS);
     }
     if (valid.lightData && typeof valid.lightData.sunrise === "number") {
       valid.lightData.sunrise = new Date(valid.lightData.sunrise);
@@ -92,25 +97,33 @@ const normalize = (x, max, min, a, b) =>
    * @returns {[string, string]} [colour, sunPos]
    */
   function skyMath(options) {
-    const { now } = options;
+    const { now, numClouds } = options;
     const { sunrise, sunset } = options.lightData;
     let colour;
     let sunPos;
+    const cloudCover =
+      100 - normalize(numClouds, RM_MAX_CLOUDS, 0, 0, RM_MAX_SAT_LOSS);
     if (now > sunset) {
       const newSunrise = new Date(sunrise);
       newSunrise.setDate(newSunrise.getDate() + 1);
       sunPos = 100 + normalize(now, newSunrise, sunset, 0, 100);
-      colour = getSkyHsl(10);
+      colour = getSkyHsl(10, cloudCover);
     } else if (now < sunrise) {
       const newSunset = new Date(sunset);
       newSunset.setDate(newSunset.getDate() - 1);
       sunPos = 100 + normalize(now, sunrise, newSunset, 0, 100);
-      colour = getSkyHsl(10);
+      colour = getSkyHsl(10, cloudCover);
     } else {
-      const normalized = normalize(now, sunset, sunrise, -20, 20);
-      const lightness = 40 - Math.abs(normalized);
-      sunPos = normalize(now, sunset, sunrise, 0, 100);
-      colour = getSkyHsl(lightness);
+      const normalized = normalize(
+        now,
+        sunset,
+        sunrise,
+        -RM_MAX_LIGHT_LOSS,
+        RM_MAX_LIGHT_LOSS
+      );
+      const lightness = RM_MAX_LIGHT - Math.abs(normalized);
+      sunPos = Math.round(normalize(now, sunset, sunrise, 0, 100));
+      colour = getSkyHsl(lightness, cloudCover);
     }
     return [colour, sunPos];
   }
