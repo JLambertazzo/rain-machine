@@ -526,7 +526,7 @@ const normalize = (x, max, min, a, b) =>
   const toRainMachineOptions = (data) => ({
     precipitation: processPrecipitation(data.weather[0].id),
     wind: data.wind,
-    numClouds: data.clouds,
+    numClouds: data.clouds.all,
     lightData: {
       sunrise: data.sys.sunrise * 1000,
       sunset: data.sys.sunset * 1000,
